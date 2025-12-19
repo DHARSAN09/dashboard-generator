@@ -13,10 +13,11 @@ def allowed_file(filename):
 def process_file(file_path, file_type):
     """Read and process uploaded file"""
     try:
+        # Limit to 100,000 rows to prevent memory issues
         if file_type == 'csv':
-            df = pd.read_csv(file_path)
+            df = pd.read_csv(file_path, nrows=100000)
         else:  # excel
-            df = pd.read_excel(file_path)
+            df = pd.read_excel(file_path, nrows=100000)
         return df
     except Exception as e:
         raise Exception(f"Error reading file: {str(e)}")

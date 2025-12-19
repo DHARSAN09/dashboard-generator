@@ -82,6 +82,9 @@ def login():
         if user and user.check_password(password):
             login_user(user, remember=remember)
             next_page = request.args.get('next')
+            # Validate next_page to prevent open redirect
+            if next_page and not next_page.startswith('/'):
+                next_page = None
             return redirect(next_page) if next_page else redirect(url_for('dashboard.dashboard_home'))
         else:
             flash('Invalid username or password.', 'danger')

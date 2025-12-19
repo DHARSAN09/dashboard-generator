@@ -10,6 +10,7 @@ def create_app():
     app = Flask(__name__)
     
     # Configuration
+    # WARNING: Set SECRET_KEY environment variable in production
     app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///dashboard.db'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -20,6 +21,8 @@ def create_app():
     db.init_app(app)
     login_manager.init_app(app)
     login_manager.login_view = 'auth.login'
+    login_manager.login_message = 'Please log in to access this page.'
+    login_manager.login_message_category = 'info'
     
     # Create upload folder if it doesn't exist
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)

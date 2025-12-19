@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash, current_app, jsonify
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
+from datetime import datetime
 from app import db
 from app.models import UploadedFile
 from app.utils import allowed_file, process_file, generate_dashboard_data
@@ -37,7 +38,6 @@ def upload_file():
             filename = secure_filename(file.filename)
             
             # Add timestamp to avoid conflicts
-            from datetime import datetime
             timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
             name, ext = os.path.splitext(filename)
             filename = f"{name}_{timestamp}{ext}"
