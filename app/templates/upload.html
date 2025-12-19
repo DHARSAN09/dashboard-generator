@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}Upload File - Dashboard Generator{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow">
+                <div class="card-body p-5">
+                    <h2 class="card-title text-center mb-4">
+                        <i class="bi bi-cloud-upload"></i> Upload File
+                    </h2>
+                    
+                    <div class="alert alert-info" role="alert">
+                        <h6 class="alert-heading"><i class="bi bi-info-circle"></i> Supported File Types</h6>
+                        <ul class="mb-0">
+                            <li>CSV files (.csv)</li>
+                            <li>Excel files (.xlsx, .xls)</li>
+                        </ul>
+                        <small>Maximum file size: 16 MB</small>
+                    </div>
+                    
+                    <form method="POST" action="{{ url_for('dashboard.upload_file') }}" 
+                          enctype="multipart/form-data" id="uploadForm">
+                        <div class="mb-4">
+                            <label for="file" class="form-label">Choose File</label>
+                            <input type="file" class="form-control form-control-lg" id="file" name="file" 
+                                   required accept=".csv,.xlsx,.xls">
+                            <div class="form-text">Select a CSV or Excel file to upload and generate dashboard.</div>
+                        </div>
+                        
+                        <div id="fileInfo" class="mb-3" style="display: none;">
+                            <div class="alert alert-success">
+                                <i class="bi bi-check-circle"></i> 
+                                <strong>Selected:</strong> <span id="fileName"></span>
+                                (<span id="fileSize"></span>)
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg" id="uploadBtn">
+                                <i class="bi bi-cloud-upload"></i> Upload and Generate Dashboard
+                            </button>
+                            <a href="{{ url_for('dashboard.dashboard_home') }}" class="btn btn-outline-secondary">
+                                <i class="bi bi-x-circle"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="card shadow mt-4">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-lightbulb"></i> Tips</h5>
+                    <ul class="mb-0">
+                        <li>Make sure your data has clear column headers</li>
+                        <li>Remove any unnecessary rows or formatting</li>
+                        <li>The dashboard will automatically detect data types and generate appropriate visualizations</li>
+                        <li>You can upload multiple files and view them separately</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.getElementById('file').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            document.getElementById('fileName').textContent = file.name;
+            document.getElementById('fileSize').textContent = formatFileSize(file.size);
+            document.getElementById('fileInfo').style.display = 'block';
+        } else {
+            document.getElementById('fileInfo').style.display = 'none';
+        }
+    });
+    
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+    }
+    
+    document.getElementById('uploadForm').addEventListener('submit', function() {
+        const btn = document.getElementById('uploadBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Uploading...';
+    });
+</script>
+{% endblock %}
