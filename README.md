@@ -66,7 +66,13 @@ A full-stack web application that dynamically generates interactive dashboards f
    python run.py
    ```
 
-6. **Access the application**
+6. **Configure environment variables (optional)**
+   ```bash
+   cp .env.example .env
+   # Edit .env and set your SECRET_KEY for production
+   ```
+
+7. **Access the application**
    Open your web browser and navigate to: `http://localhost:5000`
 
 ## Usage
@@ -144,7 +150,41 @@ The application automatically generates the following visualizations based on yo
 - File uploads are validated and sanitized
 - User authentication required for all dashboard operations
 - Session-based authentication with secure cookies
-- File size limits to prevent abuse (16MB max)
+- File size limits to prevent abuse (16MB max for upload, 100K rows for processing)
+- Open redirect protection in login flow
+- Environment-based configuration for production deployment
+- All dependencies checked for known vulnerabilities
+
+## Production Deployment
+
+For production deployment, consider the following:
+
+1. **Set Environment Variables**
+   ```bash
+   export SECRET_KEY="your-strong-secret-key-here"
+   export FLASK_DEBUG=False
+   ```
+
+2. **Use a Production WSGI Server**
+   ```bash
+   pip install gunicorn
+   gunicorn -w 4 -b 0.0.0.0:5000 run:app
+   ```
+
+3. **Security Best Practices**
+   - Use HTTPS/SSL certificates
+   - Set strong SECRET_KEY (use `python -c "import secrets; print(secrets.token_hex(32))"`)
+   - Configure proper firewall rules
+   - Regular security updates
+   - Use a production-grade database (PostgreSQL, MySQL)
+   - Implement rate limiting
+   - Set up proper logging and monitoring
+
+4. **Database Migration**
+   For production, consider using PostgreSQL:
+   ```python
+   app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://user:password@localhost/dbname'
+   ```
 
 ## Future Enhancements
 
