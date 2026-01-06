@@ -1,7 +1,7 @@
 flask==3.0.3
 flask-cors==4.0.0
 openpyxl==3.1.2
-pillow==10.3.0
+pillow==10.4.0
 python-barcode==0.15.1
 reportlab==4.2.2
 gunicorn==22.0.0
