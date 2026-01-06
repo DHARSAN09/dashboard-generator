@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📦 Barcode Generator</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%23000000' width='100' height='100'/><rect x='15' y='20' width='8' height='50' fill='%23fff'/><rect x='28' y='20' width='5' height='50' fill='%23fff'/><rect x='37' y='20' width='8' height='50' fill='%23fff'/><rect x='50' y='20' width='5' height='50' fill='%23fff'/><rect x='59' y='20' width='8' height='50' fill='%23fff'/><rect x='72' y='20' width='5' height='50' fill='%23fff'/><text x='50' y='85' font-size='20' fill='%23fff' text-anchor='middle' font-weight='bold'>📦</text></svg>">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #ffffff;
+        }
+
+        .container {
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1);
+            max-width: 600px;
+            width: 100%;
+            overflow: hidden;
+            border: 1px solid #f0f0f0;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+            color: white;
+            padding: 45px 20px;
+            text-align: center;
+            border-bottom: 2px solid #ffffff;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .header p {
+            opacity: 0.85;
+            font-size: 14px;
+            font-weight: 300;
+            letter-spacing: 0.5px;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #e0e0e0;
+            background: #f8f8f8;
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 16px;
+            border: none;
+            background: #f8f8f8;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .tab-button.active {
+            background: #ffffff;
+            color: #000000;
+            border-bottom-color: #000000;
+        }
+
+        .tab-button:hover {
+            background: #f0f0f0;
+            color: #000000;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 30px;
+            animation: fadeIn 0.3s ease;
+            background: #ffffff;
+            color: #333333;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .form-group {
+            margin-bottom: 22px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #000000;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="file"],
+        select {
+            width: 100%;
+            padding: 12px 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            background: #ffffff;
+            color: #333333;
+        }
+
+        input[type="text"]::placeholder,
+        input[type="number"]::placeholder,
+        select {
+            color: #999999;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        input[type="file"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #000000;
+            box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.08);
+        }
+
+        .summary {
+            background: #f0f0f0;
+            border-left: 4px solid #000000;
+            padding: 14px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            color: #333333;
+            font-weight: 500;
+        }
+
+        .summary strong {
+            color: #000000;
+            font-weight: 700;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        button {
+            flex: 1;
+            padding: 13px;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: #000000;
+            color: #ffffff;
+            border: 2px solid #000000;
+        }
+
+        .btn-primary:hover {
+            background: #ffffff;
+            color: #000000;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #000000;
+            border: 2px solid #e0e0e0;
+        }
+
+        .btn-secondary:hover {
+            background: #d0d0d0;
+            border-color: #d0d0d0;
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .spinner {
+            display: none;
+            width: 18px;
+            height: 18px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #ffffff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .message {
+            display: none;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            animation: slideIn 0.3s ease;
+            font-weight: 500;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.success {
+            background: #f0f8f4;
+            color: #1a5f42;
+            border-left: 4px solid #2ecc71;
+        }
+
+        .message.error {
+            background: #fef3f3;
+            color: #8b3a3a;
+            border-left: 4px solid #e74c3c;
+        }
+
+        .file-info {
+            background: #f8f8f8;
+            padding: 14px;
+            border-radius: 6px;
+            margin-top: 12px;
+            font-size: 13px;
+            color: #555;
+            display: none;
+            border-left: 3px solid #000000;
+        }
+
+        .file-info strong {
+            color: #000000;
+            font-weight: 700;
+        }
+
+        .increment-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .increment-group input {
+            flex: 1;
+        }
+
+        .increment-btn {
+            padding: 12px 14px;
+            background: #000000;
+            color: white;
+            border: 2px solid #000000;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            font-size: 16px;
+            line-height: 1;
+        }
+
+        .increment-btn:hover {
+            background: #ffffff;
+            color: #000000;
+        }
+
+        .layout-preview {
+            background: #f8f8f8;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 10px;
+            text-align: center;
+            font-size: 13px;
+            color: #666;
+            border: 1px solid #e0e0e0;
+        }
+
+        .download-section {
+            display: none;
+            background: #f8f8f8;
+            padding: 16px;
+            border-radius: 6px;
+            margin-top: 15px;
+            border-left: 4px solid #000000;
+        }
+
+        .download-section.active {
+            display: block;
+        }
+
+        .download-section label {
+            margin-bottom: 12px;
+        }
+
+        .download-link {
+            display: none;
+            background: #f0f8f4;
+            padding: 14px;
+            border-radius: 6px;
+            margin-top: 15px;
+            text-align: center;
+            border-left: 4px solid #2ecc71;
+        }
+
+        .download-link a {
+            color: #1a5f42;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .download-link a:hover {
+            text-decoration: underline;
+        }
+
+        .rename-section {
+            display: none;
+        }
+
+        .rename-section.active {
+            display: block;
+        }
+
+        small {
+            display: block;
+            margin-top: 8px;
+            color: #999;
+            font-weight: 400;
+        }
+
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .tab-button {
+                font-size: 11px;
+                padding: 12px 8px;
+            }
+
+            .tab-content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📦 Barcode Generator</h1>
+            <p>Professional Barcode Management</p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-button active" onclick="switchTab('create')">✨ Create New</button>
+            <button class="tab-button" onclick="switchTab('update')">📊 Update</button>
+            <button class="tab-button" onclick="switchTab('pdf')">📄 PDF</button>
+        </div>
+
+        <!-- Tab 1: Create New -->
+        <div id="create" class="tab-content active">
+            <div id="message-create" class="message"></div>
+
+            <div class="form-group">
+                <label for="fileName1">📄 Excel File Name</label>
+                <input type="text" id="fileName1" placeholder="e.g., barcodes.xlsx" value="barcodes.xlsx">
+            </div>
+
+            <div class="form-group">
+                <label for="startNum1">🔢 Starting Number</label>
+                <input type="number" id="startNum1" placeholder="e.g., 253310001" value="253310001">
+            </div>
+
+            <div class="form-group">
+                <label for="count1">📊 Count (1-1000)</label>
+                <input type="number" id="count1" placeholder="e.g., 10" value="10" min="1" max="1000">
+            </div>
+
+            <div class="summary" id="summary1">
+                📈 You will create <strong id="summary-text1">10 barcodes</strong> from <strong id="summary-range1">253310001 to 253310010</strong>
+            </div>
+
+            <div class="button-group">
+                <button class="btn-primary" onclick="createExcel()">
+                    <span class="spinner" id="spinner1"></span>
+                    ✨ Create File
+                </button>
+                <button class="btn-secondary" onclick="resetForm('create')">🔄 Reset</button>
+            </div>
+
+            <div class="download-link" id="download-link1"></div>
+        </div>
+
+        <!-- Tab 2: Update -->
+        <div id="update" class="tab-content">
+            <div id="message-update" class="message"></div>
+
+            <div class="form-group">
+                <label for="fileUpload">📁 Upload Excel File</label>
+                <input type="file" id="fileUpload" accept=".xlsx,.xls">
+            </div>
+
+            <div class="file-info" id="fileInfo">
+                ✅ File: <strong id="uploadedFileName"></strong><br>
+                📊 Found: <strong id="numberCount"></strong> numbers<br>
+                📈 Range: <strong id="numberRange"></strong>
+            </div>
+
+            <div class="form-group" id="updateFormGroup">
+                <label for="newStartNum">🔢 New Starting Number</label>
+                <input type="number" id="newStartNum" placeholder="Auto-filled after upload" value="">
+            </div>
+
+            <div class="form-group" id="countFormGroup">
+                <label for="count2">📊 Count to Add</label>
+                <div class="increment-group">
+                    <button class="increment-btn" onclick="decrementCount('count2')">−</button>
+                    <input type="number" id="count2" placeholder="e.g., 5" value="5" min="1" max="1000">
+                    <button class="increment-btn" onclick="incrementCount('count2')">+</button>
+                </div>
+            </div>
+
+            <div class="summary" id="summary2">
+                📈 You will add <strong id="summary-text2">5 barcodes</strong> from <strong id="summary-range2">-- to --</strong>
+            </div>
+
+            <div class="button-group" id="updateButtonGroup">
+                <button class="btn-primary" onclick="updateExcel()">
+                    <span class="spinner" id="spinner2"></span>
+                    📊 Update File
+                </button>
+                <button class="btn-secondary" onclick="resetForm('update')">🔄 Reset</button>
+            </div>
+
+            <!-- Rename Section (shown after update) -->
+            <div class="rename-section" id="renameSection">
+                <div class="download-section active">
+                    <label for="newFileName">✏️ Rename File Before Download</label>
+                    <div style="display: flex; gap: 10px; margin-top: 10px;">
+                        <input type="text" id="newFileName" placeholder="e.g., updated_barcodes" style="flex: 1;">
+                        <button class="btn-primary" onclick="renameAndDownload()" style="flex: 0 0 auto; padding: 8px 16px;">
+                            📥 Download
+                        </button>
+                    </div>
+                    <small>💡 Tip: Enter filename without extension (.xlsx will be added automatically)</small>
+                </div>
+            </div>
+
+            <div class="download-link" id="download-link2"></div>
+        </div>
+
+        <!-- Tab 3: Generate PDF -->
+        <div id="pdf" class="tab-content">
+            <div id="message-pdf" class="message"></div>
+
+            <div class="form-group">
+                <label for="excelSource">📄 Select Excel File</label>
+                <select id="excelSource">
+                    <option value="">-- Select a file --</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="pdfName">📋 PDF File Name</label>
+                <input type="text" id="pdfName" placeholder="e.g., labels_a4.pdf" value="labels_a4.pdf">
+            </div>
+
+            <div class="form-group">
+                <label for="cols">📊 Columns</label>
+                <input type="number" id="cols" value="4" min="1" max="10" onchange="updatePDFPreview()">
+            </div>
+
+            <div class="form-group">
+                <label for="rows">📊 Rows</label>
+                <input type="number" id="rows" value="8" min="1" max="20" onchange="updatePDFPreview()">
+            </div>
+
+            <div class="layout-preview" id="pdfPreview">
+                Layout: 4 × 8 = <strong>32 barcodes per page</strong>
+            </div>
+
+            <div class="button-group">
+                <button class="btn-primary" onclick="generatePDF()">
+                    <span class="spinner" id="spinner3"></span>
+                    📄 Generate PDF
+                </button>
+                <button class="btn-secondary" onclick="resetForm('pdf')">🔄 Reset</button>
+            </div>
+
+            <div class="download-link" id="download-link3"></div>
+        </div>
+    </div>
+
+    <script>
+        // Store uploaded file info for update
+        let uploadedFileInfo = {
+            fileName: null,
+            filePath: null,
+            lastNumber: null
+        };
+
+        // Tab switching
+        function switchTab(tabName) {
+            const contents = document.querySelectorAll('.tab-content');
+            const buttons = document.querySelectorAll('.tab-button');
+
+            contents.forEach(el => el.classList.remove('active'));
+            buttons.forEach(el => el.classList.remove('active'));
+
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+
+            // Load Excel files when switching to PDF tab
+            if (tabName === 'pdf') {
+                loadExcelFiles();
+            }
+        }
+
+        // Summary update for Create
+        document.getElementById('startNum1').addEventListener('change', updateSummary1);
+        document.getElementById('count1').addEventListener('change', updateSummary1);
+
+        function updateSummary1() {
+            const start = parseInt(document.getElementById('startNum1').value) || 253310001;
+            const count = parseInt(document.getElementById('count1').value) || 10;
+            const end = start + count - 1;
+            document.getElementById('summary-text1').textContent = `${count} barcode${count !== 1 ? 's' : ''}`;
+            document.getElementById('summary-range1').textContent = `${start} to ${end}`;
+        }
+
+        // Summary update for Update
+        document.getElementById('newStartNum').addEventListener('change', updateSummary2);
+        document.getElementById('count2').addEventListener('change', updateSummary2);
+
+        function updateSummary2() {
+            const start = parseInt(document.getElementById('newStartNum').value);
+            const count = parseInt(document.getElementById('count2').value) || 5;
+            
+            if (isNaN(start)) {
+                document.getElementById('summary-range2').textContent = '-- to --';
+                document.getElementById('summary-text2').textContent = `${count} barcode${count !== 1 ? 's' : ''}`;
+            } else {
+                const end = start + count - 1;
+                document.getElementById('summary-text2').textContent = `${count} barcode${count !== 1 ? 's' : ''}`;
+                document.getElementById('summary-range2').textContent = `${start} to ${end}`;
+            }
+        }
+
+        // Increment/Decrement
+        function incrementCount(id) {
+            const input = document.getElementById(id);
+            input.value = Math.min(parseInt(input.value) + 1, 1000);
+            updateSummary2();
+        }
+
+        function decrementCount(id) {
+            const input = document.getElementById(id);
+            input.value = Math.max(parseInt(input.value) - 1, 1);
+            updateSummary2();
+        }
+
+        // PDF Preview
+        function updatePDFPreview() {
+            const cols = parseInt(document.getElementById('cols').value);
+            const rows = parseInt(document.getElementById('rows').value);
+            const total = cols * rows;
+            document.getElementById('pdfPreview').innerHTML = `
+                Layout: ${cols} × ${rows} = <strong>${total} barcodes per page</strong>
+            `;
+        }
+
+        // Load Excel files for PDF generation
+        function loadExcelFiles() {
+            fetch('/api/list-excel-files')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        const select = document.getElementById('excelSource');
+                        select.innerHTML = '<option value="">-- Select a file --</option>';
+                        data.files.forEach(file => {
+                            const option = document.createElement('option');
+                            option.value = file.name;
+                            option.textContent = file.name;
+                            select.appendChild(option);
+                        });
+                    }
+                })
+                .catch(error => console.error('Error loading files:', error));
+        }
+
+        // File upload handler
+        document.getElementById('fileUpload').addEventListener('change', function(e) {
+            if (this.files.length > 0) {
+                const file = this.files[0];
+                const formData = new FormData();
+                formData.append('file', file);
+
+                showSpinner('spinner2', true);
+                showMessage('update', 'Analyzing file...', 'success');
+                document.getElementById('renameSection').classList.remove('active');
+
+                fetch('/api/upload-excel', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    showSpinner('spinner2', false);
+                    if (data.status === 'success') {
+                        // Store file info for update
+                        uploadedFileInfo.fileName = data.fileName;
+                        uploadedFileInfo.filePath = data.filePath;
+                        uploadedFileInfo.lastNumber = data.lastNumber;
+                        
+                        document.getElementById('uploadedFileName').textContent = data.fileName;
+                        document.getElementById('numberCount').textContent = data.numbersFound;
+                        document.getElementById('numberRange').textContent = data.range;
+                        document.getElementById('fileInfo').style.display = 'block';
+                        
+                        // ✨ AUTO-FILL: Set new starting number to NEXT number after last
+                        const nextNumber = data.lastNumber + 1;
+                        document.getElementById('newStartNum').value = nextNumber;
+                        updateSummary2();
+                        
+                        showMessage('update', '✅ File analyzed successfully! Next number auto-filled.', 'success');
+                    } else {
+                        showMessage('update', '❌ ' + data.message, 'error');
+                    }
+                })
+                .catch(error => {
+                    showSpinner('spinner2', false);
+                    showMessage('update', '❌ Error: ' + error.message, 'error');
+                });
+            }
+        });
+
+        // Create Excel
+        async function createExcel() {
+            const fileName = document.getElementById('fileName1').value;
+            const startNum = document.getElementById('startNum1').value;
+            const count = document.getElementById('count1').value;
+
+            if (!fileName || !startNum || !count) {
+                showMessage('create', '❌ Please fill all fields', 'error');
+                return;
+            }
+
+            showSpinner('spinner1', true);
+            showMessage('create', 'Creating Excel file...', 'success');
+
+            try {
+                const response = await fetch('/api/create-excel', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        fileName: fileName,
+                        startNum: startNum,
+                        count: count
+                    })
+                });
+
+                const data = await response.json();
+                showSpinner('spinner1', false);
+
+                if (data.status === 'success') {
+                    showMessage('create', '✅ ' + data.message, 'success');
+                    showDownloadLink('download-link1', data.fileUrl, data.fileName);
+                } else {
+                    showMessage('create', '❌ ' + data.message, 'error');
+                }
+            } catch (error) {
+                showSpinner('spinner1', false);
+                showMessage('create', '❌ Error: ' + error.message, 'error');
+            }
+        }
+
+        // Update Excel - UPDATES THE ORIGINAL FILE IN PLACE
+        async function updateExcel() {
+            if (!uploadedFileInfo.filePath) {
+                showMessage('update', '❌ Please upload a file first', 'error');
+                return;
+            }
+
+            const newStartNum = document.getElementById('newStartNum').value;
+            const count = document.getElementById('count2').value;
+
+            showSpinner('spinner2', true);
+            showMessage('update', 'Updating file...', 'success');
+
+            try {
+                const response = await fetch('/api/update-excel', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        filePath: uploadedFileInfo.filePath,
+                        newStartNum: newStartNum,
+                        count: count
+                    })
+                });
+
+                const data = await response.json();
+                showSpinner('spinner2', false);
+
+                if (data.status === 'success') {
+                    showMessage('update', '✅ ' + data.message, 'success');
+                    
+                    // Store the file path for rename
+                    uploadedFileInfo.filePath = data.filePath;
+                    uploadedFileInfo.fileName = data.fileName;
+                    
+                    // Show rename section
+                    document.getElementById('newFileName').value = data.fileName.replace('.xlsx', '').replace('.xls', '');
+                    document.getElementById('renameSection').classList.add('active');
+                    
+                } else {
+                    showMessage('update', '❌ ' + data.message, 'error');
+                }
+            } catch (error) {
+                showSpinner('spinner2', false);
+                showMessage('update', '❌ Error: ' + error.message, 'error');
+            }
+        }
+
+        // Rename and Download
+        async function renameAndDownload() {
+            if (!uploadedFileInfo.filePath) {
+                showMessage('update', '❌ File path missing', 'error');
+                return;
+            }
+
+            const newFileName = document.getElementById('newFileName').value;
+
+            if (!newFileName.trim()) {
+                showMessage('update', '❌ Please enter a filename', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/rename-and-download', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        filePath: uploadedFileInfo.filePath,
+                        newFileName: newFileName
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    showMessage('update', '✅ File ready to download', 'success');
+                    showDownloadLink('download-link2', data.fileUrl, data.fileName);
+                    document.getElementById('renameSection').classList.remove('active');
+                    uploadedFileInfo.filePath = null;
+                } else {
+                    showMessage('update', '❌ ' + data.message, 'error');
+                }
+            } catch (error) {
+                showMessage('update', '❌ Error: ' + error.message, 'error');
+            }
+        }
+
+        // Generate PDF
+        async function generatePDF() {
+            const excelSource = document.getElementById('excelSource').value;
+            const pdfName = document.getElementById('pdfName').value;
+            const cols = document.getElementById('cols').value;
+            const rows = document.getElementById('rows').value;
+
+            if (!excelSource) {
+                showMessage('pdf', '❌ Please select an Excel file', 'error');
+                return;
+            }
+
+            if (!pdfName) {
+                showMessage('pdf', '❌ Please enter PDF file name', 'error');
+                return;
+            }
+
+            showSpinner('spinner3', true);
+            showMessage('pdf', 'Generating PDF...', 'success');
+
+            try {
+                const response = await fetch('/api/generate-pdf', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        excelSource: excelSource,
+                        pdfName: pdfName,
+                        cols: cols,
+                        rows: rows
+                    })
+                });
+
+                const data = await response.json();
+                showSpinner('spinner3', false);
+
+                if (data.status === 'success') {
+                    showMessage('pdf', '✅ ' + data.message, 'success');
+                    showDownloadLink('download-link3', data.fileUrl, data.fileName);
+                } else {
+                    showMessage('pdf', '❌ ' + data.message, 'error');
+                }
+            } catch (error) {
+                showSpinner('spinner3', false);
+                showMessage('pdf', '❌ Error: ' + error.message, 'error');
+            }
+        }
+
+        // Utility functions
+        function showSpinner(id, show) {
+            document.getElementById(id).style.display = show ? 'inline-block' : 'none';
+        }
+
+        function showMessage(tab, text, type) {
+            const messageEl = document.getElementById('message-' + tab);
+            messageEl.textContent = text;
+            messageEl.className = 'message ' + type;
+            messageEl.style.display = 'block';
+        }
+
+        function showDownloadLink(id, url, fileName) {
+            const linkEl = document.getElementById(id);
+            linkEl.innerHTML = `
+                📥 <a href="${url}" download="${fileName}">Download ${fileName}</a>
+            `;
+            linkEl.style.display = 'block';
+        }
+
+        function resetForm(tab) {
+            if (tab === 'create') {
+                document.getElementById('fileName1').value = 'barcodes.xlsx';
+                document.getElementById('startNum1').value = '253310001';
+                document.getElementById('count1').value = '10';
+                updateSummary1();
+                document.getElementById('message-create').style.display = 'none';
+                document.getElementById('download-link1').style.display = 'none';
+            } else if (tab === 'update') {
+                document.getElementById('fileUpload').value = '';
+                document.getElementById('newStartNum').value = '';
+                document.getElementById('count2').value = '5';
+                document.getElementById('fileInfo').style.display = 'none';
+                document.getElementById('renameSection').classList.remove('active');
+                uploadedFileInfo = { fileName: null, filePath: null, lastNumber: null };
+                updateSummary2();
+                document.getElementById('message-update').style.display = 'none';
+                document.getElementById('download-link2').style.display = 'none';
+            } else if (tab === 'pdf') {
+                document.getElementById('excelSource').value = '';
+                document.getElementById('pdfName').value = 'labels_a4.pdf';
+                document.getElementById('cols').value = '4';
+                document.getElementById('rows').value = '8';
+                updatePDFPreview();
+                document.getElementById('message-pdf').style.display = 'none';
+                document.getElementById('download-link3').style.display = 'none';
+            }
+        }
+
+        // Initialize summaries on load
+        window.addEventListener('load', function() {
+            updateSummary1();
+            updateSummary2();
+            updatePDFPreview();
+        });
+    </script>
+</body>
+</html>
