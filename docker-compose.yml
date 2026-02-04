@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  barcode-generator:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: barcode-generator-app
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./uploads:/app/uploads
+      - ./outputs:/app/outputs
+    environment:
+      - FLASK_ENV=production
+      - FLASK_APP=barcode_app.py
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+    networks:
+      - barcode-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+networks:
+  barcode-network:
+    driver: bridge
